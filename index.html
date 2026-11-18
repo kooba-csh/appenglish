@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AppEnglish</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#1f3a5f">
+  <link rel="icon" type="image/png" href="icons/favicon.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="AppEnglish">
+</head>
+<body>
+  <header class="topbar">
+    <button class="brand" data-go="dashboard" aria-label="Painel">App<span>English</span></button>
+    <span id="syncStatus" class="sync" aria-live="polite"></span>
+    <nav class="nav" id="nav">
+      <button data-go="dashboard">Painel</button>
+      <button data-go="study">Estudar</button>
+      <button data-go="notebook">Caderno</button>
+      <button data-go="progress">Progresso</button>
+      <button data-go="settings">Ajustes</button>
+    </nav>
+  </header>
+  <main id="view" class="view" tabindex="-1"></main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Ordem importa: conteúdo → lógica → núcleo da interface → módulos → início -->
+  <script>window.CONTENT = window.CONTENT || { decks: [] };</script>
+  <script src="content/phrasal-verbs.js"></script>
+  <script src="content/idioms.js"></script>
+  <script src="content/collocations.js"></script>
+  <script src="content/readings.js"></script>
+  <script src="content/grammar.js"></script>
+  <script src="content/writing.js"></script>
+  <script src="content/speaking.js"></script>
+  <script src="js/srs.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/reading.js"></script>
+  <script src="js/grammar.js"></script>
+  <script src="js/writing.js"></script>
+  <script src="js/speaking.js"></script>
+  <script src="js/progress.js"></script>
+  <script src="js/cloud-config.js"></script>
+  <script src="js/cloud.js"></script>
+  <script>
+    App.boot();
+    // Instalável e offline quando publicado (https); abrindo o arquivo direto, não faz nada
+    if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
+    }
+  </script>
+</body>
+</html>
