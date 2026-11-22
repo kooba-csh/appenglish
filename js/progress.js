@@ -29,31 +29,31 @@
   }
 
   var BADGES = [
-    { id: "first-day", icon: "🌱", name: "Primeiro passo", desc: "Ganhar XP no primeiro dia", test: function (s) { return s.activeDays >= 1; } },
-    { id: "full-day", icon: "🗓️", name: "Dia completo", desc: "Cumprir as 4 etapas do plano num dia", test: function (s) { return s.fullDays >= 1; } },
-    { id: "streak-7", icon: "🔥", name: "Uma semana", desc: "Sequência de 7 dias", test: function (s) { return s.best >= 7; } },
-    { id: "streak-30", icon: "🏆", name: "Um mês", desc: "Sequência de 30 dias", test: function (s) { return s.best >= 30; } },
-    { id: "seen-50", icon: "🃏", name: "50 expressões", desc: "Estudar 50 itens de vocabulário", test: function (s) { return s.seen >= 50; } },
-    { id: "mastered-25", icon: "🧠", name: "Memória longa", desc: "Dominar 25 itens (21+ dias)", test: function (s) { return s.mastered >= 25; } },
-    { id: "mastered-100", icon: "💎", name: "Vocabulário sólido", desc: "Dominar 100 itens", test: function (s) { return s.mastered >= 100; } },
-    { id: "reader-5", icon: "📖", name: "Leitor", desc: "Ler 5 textos", test: function (s) { return s.readings >= 5; } },
-    { id: "reader-all", icon: "📚", name: "Biblioteca", desc: "Ler todos os textos", test: function (s) { return s.readings >= ui.content("readings").length && s.readings > 0; } },
-    { id: "grammar-4", icon: "🧩", name: "Base firme", desc: "Concluir 4 lições de gramática", test: function (s) { return s.grammar >= 4; } },
-    { id: "grammar-all", icon: "🎓", name: "Trilha completa", desc: "Concluir todas as lições", test: function (s) { return s.grammar >= ui.content("grammar").length && s.grammar > 0; } },
-    { id: "writer-1", icon: "✍️", name: "Primeiro texto", desc: "Escrever e enviar um texto", test: function (s) { return s.writings >= 1; } },
-    { id: "writer-10", icon: "🖋️", name: "Escritor", desc: "Escrever 10 textos", test: function (s) { return s.writings >= 10; } },
-    { id: "boss-1", icon: "⚔️", name: "Caçador de chefões", desc: "Vencer um chefão semanal", test: function (s) { return s.bosses >= 1; } },
-    { id: "speaker-20", icon: "🎙️", name: "Voz ativa", desc: "Praticar 20 frases de shadowing", test: function (s) { return s.shadowing >= 20; } },
-    { id: "talk-3", icon: "💬", name: "Conversador", desc: "Fazer 3 conversas", test: function (s) { return s.conversations >= 3; } },
-    { id: "sentences-25", icon: "💡", name: "Autor de frases", desc: "Criar 25 frases próprias", test: function (s) { return s.sentences >= 25; } },
-    { id: "errors-10", icon: "🔧", name: "Aprendendo com erros", desc: "Ter 10 cards no Meu deck", test: function (s) { return s.myCards >= 10; } }
+    { id: "first-day", icon: "sparkles", name: "Primeiro passo", desc: "Ganhar XP no primeiro dia", test: function (s) { return s.activeDays >= 1; } },
+    { id: "full-day", icon: "circle-check", name: "Dia completo", desc: "Cumprir as 4 etapas do plano num dia", test: function (s) { return s.fullDays >= 1; } },
+    { id: "streak-7", icon: "flame", name: "Uma semana", desc: "Sequência de 7 dias", test: function (s) { return s.best >= 7; } },
+    { id: "streak-30", icon: "trophy", name: "Um mês", desc: "Sequência de 30 dias", test: function (s) { return s.best >= 30; } },
+    { id: "seen-50", icon: "layers", name: "50 expressões", desc: "Estudar 50 itens de vocabulário", test: function (s) { return s.seen >= 50; } },
+    { id: "mastered-25", icon: "brain", name: "Memória longa", desc: "Dominar 25 itens (21+ dias)", test: function (s) { return s.mastered >= 25; } },
+    { id: "mastered-100", icon: "star", name: "Vocabulário sólido", desc: "Dominar 100 itens", test: function (s) { return s.mastered >= 100; } },
+    { id: "reader-5", icon: "book-open", name: "Leitor", desc: "Ler 5 textos", test: function (s) { return s.readings >= 5; } },
+    { id: "reader-all", icon: "book-open", name: "Biblioteca", desc: "Ler todos os textos", test: function (s) { return s.readings >= ui.content("readings").length && s.readings > 0; } },
+    { id: "grammar-4", icon: "puzzle", name: "Base firme", desc: "Concluir 4 lições de gramática", test: function (s) { return s.grammar >= 4; } },
+    { id: "grammar-all", icon: "graduation-cap", name: "Trilha completa", desc: "Concluir todas as lições", test: function (s) { return s.grammar >= ui.content("grammar").length && s.grammar > 0; } },
+    { id: "writer-1", icon: "pen-line", name: "Primeiro texto", desc: "Escrever e enviar um texto", test: function (s) { return s.writings >= 1; } },
+    { id: "writer-10", icon: "pen-line", name: "Escritor", desc: "Escrever 10 textos", test: function (s) { return s.writings >= 10; } },
+    { id: "boss-1", icon: "swords", name: "Caçador de chefões", desc: "Vencer um chefão semanal", test: function (s) { return s.bosses >= 1; } },
+    { id: "speaker-20", icon: "mic", name: "Voz ativa", desc: "Praticar 20 frases de shadowing", test: function (s) { return s.shadowing >= 20; } },
+    { id: "talk-3", icon: "messages-square", name: "Conversador", desc: "Fazer 3 conversas", test: function (s) { return s.conversations >= 3; } },
+    { id: "sentences-25", icon: "lightbulb", name: "Autor de frases", desc: "Criar 25 frases próprias", test: function (s) { return s.sentences >= 25; } },
+    { id: "errors-10", icon: "target", name: "Aprendendo com erros", desc: "Ter 10 cards no Meu deck", test: function (s) { return s.myCards >= 10; } }
   ];
 
   function check() {
     var p = ui.profile(); if (!p) return;
     var s = stats(p), fresh = [];
     BADGES.forEach(function (b) { if (!p.achievements[b.id] && b.test(s)) { p.achievements[b.id] = ui.today(); fresh.push(b); } });
-    if (fresh.length) { App.storage.save(); setTimeout(function () { ui.toast("Conquista: " + fresh[0].icon + " " + fresh[0].name); }, 900); }
+    if (fresh.length) { App.storage.save(); setTimeout(function () { ui.toast("Conquista desbloqueada: " + fresh[0].name); if (App.fx) App.fx.confetti(); }, 900); }
   }
 
   S.progress = function () {
@@ -86,7 +86,7 @@
         (p.levelTests.length > 1 ? '<p class="muted small">Histórico: ' + p.levelTests.slice(0, 6).map(function (t) { return esc(t.date) + " " + esc(t.level); }).join(" · ") + '</p>' : '') + '</div>' +
       '<div class="card"><h2>Conquistas (' + Object.keys(p.achievements).length + '/' + BADGES.length + ')</h2><div class="badges">' + BADGES.map(function (b) {
         var got = p.achievements[b.id];
-        return '<div class="badge' + (got ? " got" : "") + '"><span class="ico" aria-hidden="true">' + b.icon + '</span><strong>' + esc(b.name) + '</strong><small class="muted">' + esc(b.desc) + (got ? ' · ' + esc(got) : '') + '</small></div>';
+        return '<div class="badge' + (got ? " got" : "") + '"><span class="ico-chip" aria-hidden="true">' + App.icon(b.icon) + '</span><strong>' + esc(b.name) + '</strong><small class="muted">' + esc(b.desc) + (got ? ' · ' + esc(got) : '') + '</small></div>';
       }).join("") + '</div></div></div>';
   };
 
@@ -96,12 +96,13 @@
   function buildTest() {
     var qs = [];
     var gram = [];
-    ui.content("grammar").forEach(function (t) { t.exercises.forEach(function (e) { if (e.type === "mc") gram.push({ t: t, e: e }); }); });
+    var adv = function (l) { return !l || l === "B2" || l === "C1"; }; // a prova mede o caminho B2 → C1
+    ui.content("grammar").filter(function (t) { return adv(t.level); }).forEach(function (t) { t.exercises.forEach(function (e) { if (e.type === "mc") gram.push({ t: t, e: e }); }); });
     U.shuffle(gram).slice(0, 15).forEach(function (x) {
       qs.push({ kind: "Gramática", level: x.t.level, prompt: x.e.prompt, options: x.e.options, answer: x.e.answer, explain: x.e.explain_pt });
     });
     var items = [];
-    ui.content("decks").forEach(function (d) { d.items.forEach(function (it) { if (it.cloze && it.answer) items.push({ d: d, it: it }); }); });
+    ui.content("decks").filter(function (d) { return adv(d.level); }).forEach(function (d) { d.items.forEach(function (it) { if (it.cloze && it.answer) items.push({ d: d, it: it }); }); });
     U.shuffle(items).slice(0, 20 - qs.length).forEach(function (x) {
       var others = U.shuffle(x.d.items.filter(function (o) { return o.id !== x.it.id && U.norm(o.answer) !== U.norm(x.it.answer); })).slice(0, 3).map(function (o) { return o.answer; });
       var opts = U.shuffle([x.it.answer].concat(others));
@@ -125,7 +126,7 @@
   function question() {
     var q = test.qs[test.i];
     if (!q) return result();
-    ui.view.innerHTML = '<div class="stack narrow"><div class="session-top"><button class="btn ghost" data-go="progress" aria-label="Sair">✕</button>' +
+    ui.view.innerHTML = '<div class="stack narrow"><div class="session-top"><button class="btn ghost" data-go="progress" aria-label="Sair">' + App.icon("x") + '</button>' +
       '<div class="bar"><i style="width:' + Math.round(100 * test.i / test.qs.length) + '%"></i></div><strong>' + (test.i + 1) + '/' + test.qs.length + '</strong></div>' +
       '<div class="card stack"><div><span class="tag">' + esc(q.kind) + '</span></div><p class="cloze">' + esc(q.prompt).replace(/_{2,}/g, '<strong style="color:var(--accent)">_____</strong>') + '</p>' +
       '<div class="choices">' + q.options.map(function (o, i) { return '<button class="btn choice" data-opt="' + i + '">' + esc(o) + '</button>'; }).join("") + '</div></div></div>';

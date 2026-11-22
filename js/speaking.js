@@ -51,7 +51,7 @@
       '<div class="grid cols-2">' + all.map(function (s) {
         var tried = s.items.filter(function (x) { return p.shadowing[x.id]; });
         var avg = tried.length ? Math.round(100 * tried.reduce(function (a, x) { return a + p.shadowing[x.id].best; }, 0) / tried.length) : 0;
-        return '<button class="card tile" data-go="speaking" data-arg="' + esc(s.name) + '"><span class="ico" aria-hidden="true">🎙️</span><span><strong>' + esc(s.name) + '</strong>' +
+        return '<button class="card tile" data-go="speaking" data-arg="' + esc(s.name) + '"><span class="ico-chip" aria-hidden="true">' + App.icon("mic") + '</span><span><strong>' + esc(s.name) + '</strong>' +
           '<small class="muted">' + tried.length + '/' + s.items.length + ' frases' + (tried.length ? ' · média ' + avg + '%' : '') + '</small></span></button>';
       }).join("") + '</div>' + (all.length ? "" : '<p class="pitfall">Nenhuma frase em content/speaking.js.</p>') +
       '<div class="card"><h2>Conversação</h2><p class="muted">Pronto para falar livremente? Converse com um parceiro de IA em situações reais.</p><button class="btn primary" data-go="conversation">Ir para conversação</button></div></div>';
@@ -61,24 +61,25 @@
     var it = sh.set.items[sh.i];
     if (!it) return shFinish();
     var res = sh.results[sh.i];
-    ui.view.innerHTML = '<div class="stack narrow"><div class="session-top"><button class="btn ghost" data-go="speaking" aria-label="Sair">✕</button>' +
+    ui.view.innerHTML = '<div class="stack narrow"><div class="session-top"><button class="btn ghost" data-go="speaking" aria-label="Sair">' + App.icon("x") + '</button>' +
       '<div class="bar"><i style="width:' + Math.round(100 * sh.i / sh.set.items.length) + '%"></i></div><strong>' + (sh.i + 1) + '/' + sh.set.items.length + '</strong></div>' +
       '<div class="card stack shadow"><div><span class="tag">' + esc(sh.set.name) + '</span></div>' +
       '<p class="term" style="font-size:1.6rem" id="target">' + (res && res.tokens ? res.tokens.map(function (t) { return '<span class="' + (t.ok ? "hit" : "miss") + '">' + esc(t.w) + '</span>'; }).join(" ") : esc(it.text)) + '</p>' +
-      '<p class="muted">' + esc(it.pt) + '</p>' + (it.focus ? '<p class="pitfall">🎯 ' + esc(it.focus) + '</p>' : '') +
-      '<div class="row"><button class="btn" id="play">▶ Ouvir</button><button class="btn" id="slow">🐢 Devagar</button>' +
-      (SR ? '<button class="btn primary" id="mic">🎙 Falar</button>' : '') + '</div>' +
+      '<p class="muted">' + ui.trToggle(it.pt) + '</p>' + (it.focus ? '<p class="pitfall">' + App.icon("target", "ic-sm") + ' ' + esc(it.focus) + '</p>' : '') +
+      '<div class="row"><button class="btn" id="play">' + App.icon("volume-2") + ' Ouvir</button><button class="btn" id="slow">' + App.icon("headphones") + ' Devagar</button>' +
+      (SR ? '<button class="btn primary" id="mic">' + App.icon("mic") + ' Falar</button>' : '') + '</div>' +
       '<div id="shRes">' + (res ? resultHTML(res) : (SR ? '' : selfHTML())) + '</div>' +
       (res ? '<button class="btn primary big" id="shNext">' + (sh.i + 1 < sh.set.items.length ? "Próxima frase" : "Terminar") + '</button>' : '') +
       '</div><p class="kbd">Dica: ouça 2–3 vezes antes de falar. Copie a melodia, não só as palavras.</p></div>';
-    document.getElementById("play").onclick = function () { ui.speak(it.text, { rate: 0.95 }); };
-    document.getElementById("slow").onclick = function () { ui.speak(it.text, { rate: 0.7 }); };
+    document.getElementById("play").onclick = function () { ui.speak(it.text); };
+    document.getElementById("slow").onclick = function () { ui.speak(it.text, { rate: 0.6 }); };
+    ui.bindSpeakButtons();
     var mic = document.getElementById("mic");
     if (mic) mic.onclick = function () {
       ui.stopSpeaking();
-      mic.disabled = true; mic.textContent = "🔴 Ouvindo...";
+      mic.disabled = true; mic.innerHTML = App.icon("mic") + " Ouvindo…";
       listen(function (err, alts) {
-        mic.disabled = false; mic.textContent = "🎙 Falar";
+        mic.disabled = false; mic.innerHTML = App.icon("mic") + " Falar";
         if (err) { ui.toast(err.message); return; }
         var best = null;
         alts.forEach(function (a) { var d = U.wordDiff(it.text, a); d.heard = a; if (!best || d.score > best.score) best = d; });
@@ -92,11 +93,11 @@
     if (nx) nx.onclick = function () { sh.i++; sentence(); };
     var rt = document.getElementById("retry");
     if (rt) rt.onclick = function () { sh.results[sh.i] = null; sentence(); };
-    if (!res) setTimeout(function () { ui.speak(it.text, { rate: 0.95 }); }, 250);
+    if (!res) setTimeout(function () { ui.speak(it.text); }, 250);
   }
 
   function selfHTML() {
-    return '<p class="muted">Repita em voz alta e avalie:</p><div class="row"><button class="btn" data-self="good">👍 Saiu bem</button><button class="btn" data-self="bad">🔁 Preciso treinar</button></div>';
+    return '<p class="muted">Repita em voz alta e avalie:</p><div class="row"><button class="btn" data-self="good">' + App.icon("check") + ' Saiu bem</button><button class="btn" data-self="bad">' + App.icon("repeat") + ' Preciso treinar</button></div>';
   }
   function resultHTML(r) {
     var pct = Math.round(r.score * 100);
@@ -143,7 +144,7 @@
       (ai.hasKey(p) ? '' : ' <strong>Sem chave de API:</strong> você recebe um roteiro para fazer a conversa no claude.ai (de preferência no modo de voz).') + '</p>' +
       '<div class="grid cols-2">' + list.map(function (sc) {
         var n = p.conversations.filter(function (c) { return c.scenarioId === sc.id; }).length;
-        return '<button class="card tile" data-go="conversation" data-arg="' + esc(sc.id) + '"><span class="ico" aria-hidden="true">💬</span><span><strong>' + esc(sc.title) + '</strong>' +
+        return '<button class="card tile" data-go="conversation" data-arg="' + esc(sc.id) + '"><span class="ico-chip" aria-hidden="true">' + App.icon("messages-square") + '</span><span><strong>' + esc(sc.title) + '</strong>' +
           '<small class="muted">' + esc(sc.level) + (n ? ' · feita ' + n + '×' : '') + '</small></span></button>';
       }).join("") + '</div>' + (list.length ? "" : '<p class="pitfall">Nenhum cenário em content/speaking.js.</p>') + '</div>';
   };
@@ -179,7 +180,7 @@
 
   function usefulHTML(sc) {
     return (sc.useful || []).length ? '<details class="card"><summary><strong>Frases úteis</strong></summary><ul class="list">' + sc.useful.map(function (u) {
-      return '<li class="serif">' + esc(u) + ' <button class="speak sm" data-say="' + esc(u) + '" aria-label="Ouvir">🔊</button></li>'; }).join("") + '</ul></details>' : '';
+      return '<li class="serif">' + esc(u) + ' ' + ui.speakBtn(u, true) + ui.trToggle(ui.trOf(u)) + '</li>'; }).join("") + '</ul></details>' : '';
   }
 
   function learnerTurns() { return conv.msgs.filter(function (m) { return m.role === "user"; }).length; }
@@ -191,10 +192,10 @@
       '<h1>' + esc(sc.title) + '</h1><div class="card"><p class="small">' + esc(sc.setting_pt) + ' <strong>Objetivo:</strong> ' + esc(sc.goal_pt) + '</p></div>' + usefulHTML(sc) +
       '<div class="chat" id="chat">' + conv.msgs.map(function (m) {
         return '<div class="bubble ' + (m.role === "user" ? "me" : "them") + '">' + esc(m.content) +
-          (m.role === "assistant" ? ' <button class="speak sm" data-say="' + esc(m.content) + '" aria-label="Ouvir">🔊</button>' : '') + '</div>';
+          (m.role === "assistant" ? ' ' + ui.speakBtn(m.content, true) : '') + '</div>';
       }).join("") + (conv.busy ? '<div class="bubble them typing">…</div>' : '') + '</div>' +
       (conv.ended ? '<div id="convFb"></div>' :
-      '<form id="chatForm" class="chatbar">' + (SR ? '<button type="button" class="btn" id="cmic" title="Falar"' + (conv.busy ? " disabled" : "") + '>🎙</button>' : '') +
+      '<form id="chatForm" class="chatbar">' + (SR ? '<button type="button" class="btn" id="cmic" aria-label="Falar"' + (conv.busy ? " disabled" : "") + '>' + App.icon("mic") + '</button>' : '') +
         '<input class="input" id="cin" autocomplete="off" placeholder="Type or speak your answer..."' + (conv.busy ? " disabled" : "") + '>' +
         '<button class="btn primary" type="submit"' + (conv.busy ? " disabled" : "") + '>Enviar</button></form>' +
       '<button class="btn big" id="endConv"' + (learnerTurns() < 3 || conv.busy ? " disabled" : "") + '>Encerrar e receber correção' + (learnerTurns() < 3 ? " (fale pelo menos 3 vezes)" : "") + '</button>') +
@@ -210,10 +211,10 @@
       f.onsubmit = function (e) { e.preventDefault(); send(inp.value.trim()); };
       var m = document.getElementById("cmic");
       if (m) m.onclick = function () {
-        ui.stopSpeaking(); m.disabled = true; m.textContent = "🔴";
+        ui.stopSpeaking(); m.disabled = true; m.classList.add("rec");
         listen(function (err, alts) {
           var mm = document.getElementById("cmic"), ci = document.getElementById("cin");
-          if (mm) { mm.disabled = !!conv.busy; mm.textContent = "🎙"; }
+          if (mm) { mm.disabled = !!conv.busy; mm.classList.remove("rec"); }
           if (err) { ui.toast(err.message); return; }
           if (ci && !ci.disabled) { ci.value = (ci.value ? ci.value + " " : "") + alts[0]; ci.focus(); }
           else conv.draft = (conv.draft ? conv.draft + " " : "") + alts[0];

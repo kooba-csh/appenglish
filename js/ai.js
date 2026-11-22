@@ -11,29 +11,79 @@
 
   function hasKey(p) { return !!(p && p.ai && p.ai.key && p.ai.key.trim()); }
 
-  function call(p, system, messages, maxTokens) {
+  function apiError(status, j, p) {
+    var msg = (j && j.error && j.error.message) || ("HTTP " + status);
+    if (status === 401) msg = "Chave da API inválida. Confira em Ajustes.";
+    else if (status === 429) msg = "Limite de uso da API atingido. Tente de novo em alguns minutos.";
+    else if (status === 404) msg = "Modelo não encontrado (" + (p.ai.model || "") + "). Troque o modelo em Ajustes.";
+    else if (status === 529 || status === 503) msg = "A IA está sobrecarregada agora. Tente de novo em instantes.";
+    return new Error(msg);
+  }
+
+  /**
+   * Chama a API do Claude.
+   * opts.onProgress(textoParcial, segundos): liga o modo "streaming" (a resposta chega aos poucos).
+   * opts.timeout (ms, total) e opts.idle (ms sem receber nada) — se estourar, dá erro com aviso claro.
+   */
+  function call(p, system, messages, maxTokens, opts) {
+    opts = opts || {};
     if (!hasKey(p)) return Promise.reject(new Error("Configure a chave da API em Ajustes, ou use o modo copiar e colar."));
+    var stream = typeof opts.onProgress === "function" && typeof ReadableStream !== "undefined";
+    var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    var why = null, t0 = Date.now(), idleT, totalT;
+    function arm() { clearTimeout(idleT); idleT = setTimeout(function () { why = "idle"; if (ctrl) ctrl.abort(); }, opts.idle || 45000); }
+    totalT = setTimeout(function () { why = "total"; if (ctrl) ctrl.abort(); }, opts.timeout || 150000);
+    arm();
+    function done() { clearTimeout(idleT); clearTimeout(totalT); }
+    var body = { model: p.ai.model || MODELS[0].id, max_tokens: maxTokens || 1500, system: system, messages: messages };
+    if (stream) body.stream = true;
     return fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
+      method: "POST", signal: ctrl ? ctrl.signal : undefined,
       headers: {
         "content-type": "application/json",
         "x-api-key": p.ai.key.trim(),
         "anthropic-version": "2023-06-01",
         "anthropic-dangerous-direct-browser-access": "true"
       },
-      body: JSON.stringify({ model: p.ai.model || MODELS[0].id, max_tokens: maxTokens || 1500, system: system, messages: messages })
+      body: JSON.stringify(body)
     }).then(function (r) {
-      return r.json().catch(function () { return {}; }).then(function (j) {
-        if (!r.ok) {
-          var msg = (j && j.error && j.error.message) || ("HTTP " + r.status);
-          if (r.status === 401) msg = "Chave da API inválida. Confira em Ajustes.";
-          else if (r.status === 429) msg = "Limite de uso da API atingido. Tente de novo em alguns minutos.";
-          else if (r.status === 404) msg = "Modelo não encontrado (" + (p.ai.model || "") + "). Troque o modelo em Ajustes.";
-          throw new Error(msg);
-        }
-        return (j.content || []).filter(function (b) { return b.type === "text"; }).map(function (b) { return b.text; }).join("");
-      });
-    }, function () { throw new Error("Sem conexão com a API. Verifique a internet."); });
+      if (!r.ok) return r.json().catch(function () { return {}; }).then(function (j) { throw apiError(r.status, j, p); });
+      if (!stream || !r.body || !/event-stream/.test(r.headers.get("content-type") || "")) {
+        return r.json().then(function (j) {
+          return (j.content || []).filter(function (b) { return b.type === "text"; }).map(function (b) { return b.text; }).join("");
+        });
+      }
+      // Lê a resposta em fluxo (Server-Sent Events)
+      var reader = r.body.getReader(), dec = new TextDecoder(), buf = "", text = "";
+      function pump() {
+        return reader.read().then(function (res) {
+          if (res.done) return text;
+          arm();
+          buf += dec.decode(res.value, { stream: true });
+          var parts = buf.split("\n\n"); buf = parts.pop();
+          parts.forEach(function (ev) {
+            ev.split("\n").forEach(function (line) {
+              if (line.indexOf("data:") !== 0) return;
+              var j; try { j = JSON.parse(line.slice(5).trim()); } catch (e) { return; }
+              if (j.type === "content_block_delta" && j.delta && j.delta.type === "text_delta") {
+                text += j.delta.text; opts.onProgress(text, (Date.now() - t0) / 1000);
+              } else if (j.type === "error") {
+                var ae = new Error(/overload/i.test((j.error && j.error.type) || "") ? "A IA está sobrecarregada agora. Tente de novo em instantes." : ((j.error && j.error.message) || "Erro da API durante a resposta."));
+                ae.api = true; throw ae;
+              }
+            });
+          });
+          return pump();
+        });
+      }
+      return pump();
+    }).then(function (t) { done(); return t; }, function (err) {
+      done();
+      if (why) throw new Error(why === "idle" ? "A IA parou de responder. Tente de novo (ou use um modelo mais rápido, como o Haiku, em Ajustes)."
+                                              : "A IA demorou demais. Tente de novo (ou use um modelo mais rápido, como o Haiku, em Ajustes).");
+      if (err && (err.api || /HTTP|API|Chave|Limite|Modelo|sobrecarregada/.test(err.message))) throw err;
+      throw new Error("Sem conexão com a API. Verifique a internet.");
+    });
   }
 
   var FEEDBACK_SCHEMA =
@@ -48,12 +98,13 @@
 
   var TUTOR = "You are an experienced English teacher for a Brazilian adult (a civil engineer) moving from B2 to C1. " +
     "You are precise, encouraging and honest. You never invent errors: if something is correct, leave it. " +
-    "List at most 8 errors, the most important first. Give 2-4 better_expressions that would make the student sound more natural.";
+    "List at most 8 errors, the most important first. Give 2-4 better_expressions that would make the student sound more natural. " +
+    "Be concise: short explanations (one sentence each).";
 
   function writingRequest(task, text) {
     var system = TUTOR + " Reply ONLY with a valid JSON object, no markdown, following exactly this schema:\n" + FEEDBACK_SCHEMA;
     var user = "Writing task (" + (task.level || "B2") + ", " + (task.type || "free") + "): " + task.prompt_en +
-      "\nExpected length: " + (task.minWords || 80) + "-" + (task.maxWords || 200) + " words.\n\nStudent's text:\n\"\"\"\n" + text + "\n\"\"\"";
+      "\nThere is no length limit: the student writes as much as they can. Never penalise or comment on the length; judge only the quality of what was written.\n\nStudent's text:\n\"\"\"\n" + text + "\n\"\"\"";
     return { system: system, user: user };
   }
 

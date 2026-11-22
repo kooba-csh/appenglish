@@ -53,6 +53,7 @@
 
   function speak(text, opts) {
     opts = opts || {};
+    if (App.audio) return App.audio.say(text, opts);
     try {
       if (!("speechSynthesis" in window)) { toast("Seu navegador não tem leitura em voz alta."); return null; }
       window.speechSynthesis.cancel();
@@ -67,7 +68,18 @@
       return u;
     } catch (e) { return null; }
   }
-  function stopSpeaking() { try { window.speechSynthesis.cancel(); } catch (e) { /* ignora */ } }
+  function stopSpeaking() { if (App.audio) { App.audio.stop(); return; } try { window.speechSynthesis.cancel(); } catch (e) { /* ignora */ } }
+
+  // ---------- tradução e botões de áudio ----------
+  function trOf(s) { var t = window.CONTENT && CONTENT.tr; return (t && (t[s] || t[String(s).trim()])) || ""; }
+  // Botão "PT" que mostra/esconde a tradução logo depois dele
+  function trToggle(pt) {
+    if (!pt) return "";
+    return '<button class="trbtn" type="button" aria-expanded="false" title="Ver tradução">' + App.icon("languages", "ic-sm") + 'PT</button><span class="tr" hidden>' + esc(pt) + '</span>';
+  }
+  function speakBtn(text, small) {
+    return '<button class="speak' + (small ? " sm" : "") + '" type="button" data-say="' + esc(text) + '" aria-label="Ouvir">' + App.icon("volume-2") + '</button>';
+  }
 
   function copyText(text) {
     function fallback() {
@@ -87,6 +99,7 @@
   }
 
   function reportXp(res) {
+    if (App.fx) { if (res.levelUp) App.fx.levelUp(game.levelInfo(profile().xp).level); else if (res.goalJustMet) App.fx.confetti(); }
     if (res.levelUp) toast("Subiu para o nível " + game.levelInfo(profile().xp).level + "!");
     else if (res.goalJustMet) toast("Meta diária cumprida! +" + game.GOAL_BONUS + " XP" + (res.usedFreeze ? " (congelamento usado)" : ""));
   }
@@ -119,11 +132,12 @@
 
   // ---------- roteamento ----------
   var NAV_OF = { session: "study", reading: "study", grammar: "study", writing: "study", speaking: "study", conversation: "study",
-                 decks: "study", leveltest: "progress", summary: "dashboard" };
+                 decks: "study", games: "study", placement: "study", leveltest: "progress", summary: "dashboard" };
   function go(name, arg) {
     if (!profile() && name !== "profiles") name = "profiles";
     if (route === "session" && name !== "session") session = null;
     if (route !== name) stopSpeaking();
+    if (App.games && App.games.stop) App.games.stop();
     if (App.speaking && App.speaking.stop) App.speaking.stop();
     route = name;
     nav.classList.toggle("hidden", name === "profiles");
@@ -163,7 +177,7 @@
     document.getElementById("newProfile").onsubmit = function (e) {
       e.preventDefault();
       var name = e.target.name.value.trim(); if (!name) return;
-      store.createProfile(name); applyTheme(profile()); go("dashboard");
+      store.createProfile(name); applyTheme(profile()); go(screens.placement ? "placement" : "dashboard", "novo");
     };
   };
 
@@ -196,7 +210,7 @@
 
     view.innerHTML =
       '<div class="stack">' +
-      '<div class="hero"><div><p class="muted" style="margin:0">' + hello + ',</p><h1>' + esc(p.name) + '</h1></div>' +
+      '<div class="hero"><div><p class="muted" style="margin:0">' + hello + ',</p><h1>' + esc(p.name) + '</h1><span class="tag">' + App.icon("graduation-cap", "ic-sm") + ' Inglês ' + esc(p.level || "B2") + '</span></div>' +
       '<div style="min-width:240px;flex:1;max-width:360px"><div class="row" style="justify-content:space-between;margin-bottom:6px">' +
       '<span class="level-badge">Nível ' + li.level + '</span><span class="muted">' + li.xpInLevel + ' / ' + li.xpToNext + ' XP</span></div>' +
       '<div class="bar"><i style="width:' + Math.round(li.progress * 100) + '%"></i></div></div></div>' +
@@ -213,7 +227,7 @@
       '</div>' +
 
       '<div class="grid cols-3">' +
-      '<div class="card stat"><span class="k">Sequência</span><span class="v">' + streak + (streak === 1 ? " dia" : " dias") + '</span>' +
+      '<div class="card stat"><span class="k">' + App.icon("flame", "ic-sm streak") + ' Sequência</span><span class="v">' + streak + (streak === 1 ? " dia" : " dias") + '</span>' +
       '<span class="muted small">Recorde ' + (st.best || 0) + ' · ' + (st.freezes > 0 ? "1 congelamento disponível" : "congelamento usado nesta semana") + '</span></div>' +
       '<div class="card stat"><span class="k">Meta de hoje</span><span class="v">' + d.xp + ' <small class="muted" style="font-size:1rem">/ ' + p.dailyGoal + ' XP</small></span>' +
       '<div class="bar"><i style="width:' + goalPct + '%"></i></div></div>' +
@@ -252,20 +266,21 @@
     var gDone = g.filter(function (t) { return p.grammar[t.id] && p.grammar[t.id].passed; }).length;
     var rDone = r.filter(function (x) { return p.readings[x.id]; }).length;
     function tile(goName, icon, title, sub) {
-      return '<button class="card tile" data-go="' + goName + '"><span class="ico" aria-hidden="true">' + icon + '</span>' +
+      return '<button class="card tile" data-go="' + goName + '"><span class="ico-chip" aria-hidden="true">' + App.icon(icon) + '</span>' +
         '<span><strong>' + title + '</strong><small class="muted">' + sub + '</small></span></button>';
     }
     view.innerHTML = '<div class="stack"><h1>Estudar</h1>' +
       '<div class="grid cols-2">' +
-      '<div class="card tile" id="vocabTile" role="button" tabindex="0"><span class="ico" aria-hidden="true">🃏</span><span><strong>Vocabulário</strong><small class="muted">' +
+      '<div class="card tile" id="vocabTile" role="button" tabindex="0"><span class="ico-chip" aria-hidden="true">' + App.icon("layers") + '</span><span><strong>Vocabulário</strong><small class="muted">' +
         plural(v.stats.due, "revisão", "revisões") + ' + ' + plural(v.newLeft, "novo", "novos") + ' hoje</small></span></div>' +
-      tile("reading", "📖", "Leitura", rDone + "/" + r.length + " textos lidos") +
-      tile("grammar", "🧩", "Gramática", gDone + "/" + g.length + " lições concluídas") +
-      tile("writing", "✍️", "Escrita", p.writings.length + " de " + w.length + " propostas · correção por IA") +
-      tile("speaking", "🎙️", "Fala (shadowing)", sh.length + " frases para repetir em voz alta") +
-      tile("conversation", "💬", "Conversação", sc.length + " cenários com parceiro de IA") +
+      tile("reading", "book-open", "Leitura", rDone + "/" + r.length + " textos lidos") +
+      tile("grammar", "puzzle", "Gramática", gDone + "/" + g.length + " lições concluídas") +
+      tile("writing", "pen-line", "Escrita", p.writings.length + " de " + w.length + " propostas · correção por IA") +
+      tile("speaking", "mic", "Fala (shadowing)", sh.length + " frases para repetir em voz alta") +
+      tile("conversation", "messages-square", "Conversação", sc.length + " cenários com parceiro de IA") +
+      tile("games", "gamepad-2", "Jogos", "memória, relâmpago, monte a frase, ditado") +
       '</div>' +
-      '<div class="row"><button class="btn" data-go="decks">Gerenciar decks</button><button class="btn" data-go="leveltest">Prova de nível</button></div></div>';
+      '<div class="row"><button class="btn" data-go="decks">Gerenciar decks</button><button class="btn" data-go="leveltest">Prova de nível</button><button class="btn" data-go="placement">Teste de nivelamento</button></div></div>';
     var vt = document.getElementById("vocabTile");
     function startVocab() {
       if (!startSession(0)) {
@@ -309,7 +324,7 @@
 
   function header() {
     var s = session, pct = Math.round(100 * Math.min(s.i, s.queue.length) / Math.max(1, s.queue.length));
-    return '<div class="session-top"><button class="btn ghost" data-go="dashboard" aria-label="Sair">✕</button>' +
+    return '<div class="session-top"><button class="btn ghost icon-btn" data-go="dashboard" aria-label="Sair">' + App.icon("x") + '</button>' +
       '<div class="bar"><i style="width:' + pct + '%"></i></div><strong class="xp-pop">+' + s.xp + ' XP</strong></div>';
   }
 
@@ -323,8 +338,8 @@
   function details(it) {
     return '<div class="answer"><p class="meaning"><strong>' + esc(it.meaning) + '</strong></p>' +
       '<p class="muted">PT: ' + esc(it.pt) + '</p><ul>' +
-      (it.examples || []).map(function (e) { return '<li>' + esc(e) + ' <button class="speak sm" data-say="' + esc(e) + '" aria-label="Ouvir exemplo">🔊</button></li>'; }).join("") +
-      '</ul>' + (it.pitfall && it._deck.type !== "custom" ? '<p class="pitfall">⚠ ' + esc(it.pitfall) + '</p>' : '') + '</div>';
+      (it.examples || []).map(function (e) { return '<li>' + esc(e) + ' ' + speakBtn(e, true) + trToggle(trOf(e)) + '</li>'; }).join("") +
+      '</ul>' + (it.pitfall && it._deck.type !== "custom" ? '<p class="pitfall">' + esc(it.pitfall) + '</p>' : '') + '</div>';
   }
 
   function gradeButtons() {
@@ -341,7 +356,7 @@
     if (s.phase === "flash") {
       html += '<div class="card flash"><div>' + tags(it) + '</div>' +
         '<div class="term">' + esc(it.term) + '</div>' +
-        '<div><button class="speak" data-say="' + esc(it.term) + '" aria-label="Ouvir">🔊</button></div>' +
+        '<div>' + speakBtn(it.term) + '</div>' +
         (s.flipped ? details(it) + gradeButtons()
                    : '<button class="btn primary big" id="flip">Mostrar resposta</button><p class="kbd">Espaço para virar</p>') +
         '</div>';
@@ -356,7 +371,7 @@
       } else {
         var full = parts[0] + it.answer + (parts[1] || "");
         html += (s.checked === "ok" ? '<p class="feedback ok">Correto!</p>' : s.checked === "almost" ? '<p class="feedback almost">Quase! A expressão está certa, mas nesta frase a forma é: ' + esc(it.answer) + '</p>' : '<p class="feedback no">Resposta: ' + esc(it.answer) + (s.typed ? ' — você escreveu "' + esc(s.typed) + '"' : '') + '</p>') +
-          '<p class="cloze">' + esc(full) + ' <button class="speak" data-say="' + esc(full) + '" aria-label="Ouvir">🔊</button></p>' +
+          '<p class="cloze">' + esc(full) + ' ' + speakBtn(full) + '</p>' +
           details(it) + gradeButtons() +
           (s.checked !== "ok" ? '<p class="kbd">Se foi só erro de digitação, pode escolher Bom.</p>' : '');
       }
@@ -375,7 +390,21 @@
   }
 
   function bindSpeakButtons(root) {
-    (root || view).querySelectorAll("[data-say]").forEach(function (b) { b.onclick = function () { speak(b.getAttribute("data-say")); }; });
+    root = root || view;
+    root.querySelectorAll("[data-say]").forEach(function (b) {
+      b.onclick = function () {
+        b.classList.add("busy");
+        var pr = speak(b.getAttribute("data-say"));
+        var off = function () { b.classList.remove("busy"); };
+        if (pr && pr.then) pr.then(off, off); else setTimeout(off, 400);
+      };
+    });
+    root.querySelectorAll(".trbtn").forEach(function (b) {
+      b.onclick = function () {
+        var t = b.nextElementSibling; if (!t) return;
+        t.hidden = !t.hidden; b.setAttribute("aria-expanded", !t.hidden);
+      };
+    });
   }
 
   function bindSession() {
@@ -536,7 +565,7 @@
         return '<li>' + (b.instead_of ? '<span class="muted">' + esc(b.instead_of) + '</span> → ' : '') + '<strong>' + esc(b.try) + '</strong><br><span class="muted">' + esc(b.why_pt) + '</span></li>';
       }).join("") + '</ul>' : '') +
       (fb.corrected_text ? '<details><summary><strong>Ver versão corrigida completa</strong></summary><p class="serif">' + esc(fb.corrected_text).replace(/\n/g, "<br>") +
-        '</p><button class="speak" data-say="' + esc(fb.corrected_text) + '" aria-label="Ouvir">🔊</button></details>' : '') +
+        '</p>' + speakBtn(fb.corrected_text) + '</details>' : '') +
       '</div>';
   }
   function bindFeedback(fb, source, onAdded) {
@@ -589,7 +618,7 @@
       '<div class="card"><h2>Minhas frases (' + p.sentences.length + ')</h2>' +
       (p.sentences.length ? '<ul class="list">' + p.sentences.map(function (s) {
         return '<li><span class="tag">' + esc(s.term) + '</span> <span class="muted small">' + esc(s.date) + '</span><br>' +
-          '<span class="serif">' + esc(s.text) + '</span> <button class="speak sm" data-say="' + esc(s.text) + '" aria-label="Ouvir">🔊</button></li>'; }).join("") + '</ul>'
+          '<span class="serif">' + esc(s.text) + '</span> ' + speakBtn(s.text, true) + '</li>'; }).join("") + '</ul>'
         : '<p class="muted">As frases que você criar nas sessões aparecem aqui.</p>') + '</div></div>';
     bindSpeakButtons();
   };
@@ -673,12 +702,16 @@
     view: view, esc: esc, today: today, profile: profile, content: content, toast: toast, plural: plural, speak: speak,
     stopSpeaking: stopSpeaking, copyText: copyText, go: go, award: award, markPlan: markPlan, addMyCards: addMyCards,
     feedbackHTML: feedbackHTML, bindFeedback: bindFeedback, pasteBackHTML: pasteBackHTML, bindSpeakButtons: bindSpeakButtons,
-    route: function () { return route; }, decks: decks, itemsOf: itemsOf
+    route: function () { return route; }, decks: decks, itemsOf: itemsOf, activeDecks: activeDecks,
+    trOf: trOf, trToggle: trToggle, speakBtn: speakBtn
   };
   App.boot = function () {
     store.load();
     applyTheme(profile());
     if ("speechSynthesis" in window) window.speechSynthesis.getVoices();
+    Array.prototype.forEach.call(document.querySelectorAll("[data-icon]"), function (b) {
+      if (!b.querySelector("svg")) b.insertAdjacentHTML("afterbegin", App.icon(b.getAttribute("data-icon")));
+    });
     go(profile() ? "dashboard" : "profiles");
   };
 })();

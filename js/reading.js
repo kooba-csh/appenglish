@@ -1,19 +1,35 @@
-/* AppEnglish — Fase 2: leitura com glossário clicável, áudio e perguntas de compreensão. */
+/* AppEnglish — leitura: temas, níveis, glossário clicável, áudio (player) e tradução por parágrafo. */
 (function () {
   "use strict";
-  var ui = App.ui, U = App.util, S = App.screens, esc = ui.esc;
-  var current = null; // { r, answers: [], checked: bool }
+  var ui = App.ui, U = App.util, S = App.screens, esc = ui.esc, I = App.icon;
+  var LV = ["A1", "A2", "B1", "B2", "C1"];
+  var TOPIC_ICON = {
+    "Matemática": "calculator", "Física": "atom", "Astronomia": "telescope", "Engenharia": "hard-hat",
+    "Xadrez": "crown", "Psicologia": "face-grinning", "Neurociência": "brain", "Curiosidades históricas": "landmark",
+    "Desenvolvimento pessoal": "target", "Corpo humano e fitness": "dumbbell", "Filosofia": "scroll", "Biografias": "user-round",
+    "Trabalho": "briefcase", "Viagem": "plane", "Tecnologia": "cpu", "Sociedade": "users", "Saúde": "heart-pulse",
+    "Cultura": "globe", "Rotina": "sun", "Comida": "utensils", "Cidade": "landmark", "Obra": "hard-hat", "Hobby": "gamepad-2"
+  };
+  var current = null, filter = "todos";
 
-  function sentences(text) { return String(text).replace(/\n+/g, " ").match(/[^.!?]+[.!?]+["')\]]*|[^.!?]+$/g) || [text]; }
+  function li(l) { var i = LV.indexOf(l); return i < 0 ? 3 : i; }
+  function topicIcon(t) { return TOPIC_ICON[cap(t)] || "book-open"; }
+  function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+
+  function sentences(text) { return App.audio ? App.audio.split(text) : [text]; }
   function sentenceWith(text, term) {
     var t = term.toLowerCase(), list = sentences(text);
     for (var i = 0; i < list.length; i++) if (list[i].toLowerCase().indexOf(t) >= 0) return list[i].trim();
     return "";
   }
+  function translation(r) {
+    var t = r.text_pt || (window.CONTENT && CONTENT.readingTr && CONTENT.readingTr[r.id]) || "";
+    return t ? t.split(/\n\n+/) : [];
+  }
 
-  // Texto com os termos do glossário viram botões
+  // Texto com os termos do glossário viram botões; cada parágrafo ganha "ver tradução"
   function markup(r) {
-    var marks = [], txt = r.text;
+    var marks = [], txt = r.text, pt = translation(r);
     (r.glossary || []).map(function (g, i) { return { g: g, i: i }; })
       .sort(function (a, b) { return b.g.term.length - a.g.term.length; })
       .forEach(function (x) {
@@ -27,34 +43,54 @@
       var mk = marks[+n];
       return '<button class="gloss" data-g="' + mk.i + '">' + esc(mk.text) + '</button>';
     });
-    return html.split(/\n\n+/).map(function (par) { return '<p>' + par.replace(/\n/g, "<br>") + '</p>'; }).join("");
+    return html.split(/\n\n+/).map(function (par, i) {
+      return '<p>' + par.replace(/\n/g, "<br>") + (pt[i] ? ' ' + ui.trToggle(pt[i]) : '') + '</p>';
+    }).join("");
   }
 
   function status(p, r) { return p.readings[r.id]; }
 
   function suggested(p) {
-    var list = ui.content("readings");
-    return list.filter(function (r) { return !status(p, r) && r.level === "B2"; })[0] ||
-           list.filter(function (r) { return !status(p, r); })[0] || null;
+    var list = ui.content("readings"), my = li(p.level || "B2");
+    function unread(f) { return list.filter(function (r) { return !status(p, r) && f(r); })[0]; }
+    return unread(function (r) { return li(r.level) === my; }) ||
+           unread(function (r) { return Math.abs(li(r.level) - my) <= 1; }) || unread(function () { return true; }) || null;
+  }
+
+  function tile(p, r) {
+    var st = status(p, r);
+    return '<button class="card tile" data-go="reading" data-arg="' + esc(r.id) + '"><span class="ico-chip" aria-hidden="true">' + I(topicIcon(r.topic)) + '</span>' +
+      '<span><strong>' + esc(r.title) + '</strong><small class="muted">' + esc(cap(r.topic)) + ' · ' + esc(r.level) +
+      (st ? ' · ' + I("circle-check", "ic-sm ok-text") + ' ' + st.best + '/' + r.questions.length : '') + '</small></span></button>';
   }
 
   S.reading = function (id) {
     var p = ui.profile(), list = ui.content("readings");
     if (id) { var r = list.filter(function (x) { return x.id === id; })[0]; if (r) return open(r); }
     var sug = suggested(p);
-    ui.view.innerHTML = '<div class="stack"><div class="row"><button class="btn ghost" data-go="study">← Estudar</button></div><h1>Leitura</h1>' +
-      '<p class="muted">Leia sem traduzir tudo: entenda pelo contexto, clique nos termos destacados quando precisar e ouça o texto para treinar o ouvido.</p>' +
-      (sug ? '<div class="card highlight"><span class="tag">leitura do dia</span><h2>' + esc(sug.title) + '</h2><p class="muted">' + esc(sug.level) + ' · ' + esc(sug.topic) +
-        ' · ~' + Math.max(2, Math.round(U.countWords(sug.text) / 130)) + ' min</p><button class="btn primary" data-go="reading" data-arg="' + esc(sug.id) + '">Ler agora</button></div>' : '') +
-      ["B2", "C1"].map(function (lv) {
-        var items = list.filter(function (r) { return r.level === lv; });
+    // Temas favoritos (lista do Cleiton) primeiro, depois os outros; "engenharia" e "Engenharia" viram um só
+    var FAV = ["Matemática", "Física", "Astronomia", "Engenharia", "Xadrez", "Psicologia", "Neurociência", "Curiosidades históricas",
+      "Desenvolvimento pessoal", "Corpo humano e fitness", "Filosofia", "Biografias"];
+    var topics = [];
+    list.forEach(function (r) { var k = cap(r.topic); if (topics.indexOf(k) < 0) topics.push(k); });
+    topics.sort(function (x, y) { var a = FAV.indexOf(x), b = FAV.indexOf(y); a = a < 0 ? 99 : a; b = b < 0 ? 99 : b; return a - b || x.localeCompare(y); });
+    var shown = list.filter(function (r) { return filter === "todos" || cap(r.topic) === filter; });
+    ui.view.innerHTML = '<div class="stack"><div class="row"><button class="btn ghost" data-go="study">' + I("arrow-left") + ' Estudar</button></div><h1>Leitura</h1>' +
+      '<p class="muted">Leia sem traduzir tudo: entenda pelo contexto, toque nos termos destacados e use <strong>PT</strong> ao fim do parágrafo só quando precisar.</p>' +
+      (sug ? '<div class="card highlight"><span class="tag">' + I("sparkles", "ic-sm") + ' leitura do dia · seu nível ' + esc(p.level || "B2") + '</span><h2>' + esc(sug.title) + '</h2><p class="muted">' +
+        esc(cap(sug.topic)) + ' · ' + esc(sug.level) + ' · ~' + Math.max(2, Math.round(U.countWords(sug.text) / 130)) + ' min</p><button class="btn primary" data-go="reading" data-arg="' + esc(sug.id) + '">Ler agora</button></div>' : '') +
+      '<div class="chips filter" role="group" aria-label="Filtrar por tema">' + ["todos"].concat(topics).map(function (t) {
+        return '<button class="chip' + (t === filter ? ' on' : '') + '" data-topicf="' + esc(t) + '" aria-pressed="' + (t === filter) + '">' +
+          (t === "todos" ? "Todos" : I(topicIcon(t), "ic-sm") + ' ' + esc(cap(t))) + '</button>';
+      }).join("") + '</div>' +
+      LV.map(function (lv) {
+        var items = shown.filter(function (r) { return r.level === lv; });
         if (!items.length) return "";
-        return '<h2>' + lv + '</h2><div class="grid cols-2">' + items.map(function (r) {
-          var st = status(p, r);
-          return '<button class="card tile" data-go="reading" data-arg="' + esc(r.id) + '"><span class="ico" aria-hidden="true">' + (st ? "✅" : "📄") + '</span><span><strong>' + esc(r.title) + '</strong>' +
-            '<small class="muted">' + esc(r.topic) + (st ? ' · melhor nota ' + st.best + '/' + r.questions.length : ' · não lido') + '</small></span></button>';
-        }).join("") + '</div>';
-      }).join("") + (list.length ? "" : '<p class="pitfall">Nenhuma leitura em content/readings.js.</p>') + '</div>';
+        return '<h2>' + lv + '</h2><div class="grid cols-2">' + items.map(function (r) { return tile(p, r); }).join("") + '</div>';
+      }).join("") + (list.length ? "" : '<p class="pitfall">Nenhuma leitura em content/.</p>') + '</div>';
+    ui.view.querySelectorAll("[data-topicf]").forEach(function (b) {
+      b.onclick = function () { filter = b.getAttribute("data-topicf"); S.reading(); };
+    });
   };
 
   function open(r) {
@@ -63,12 +99,15 @@
   }
 
   function render() {
-    var r = current.r, p = ui.profile(), st = status(p, r);
-    ui.view.innerHTML = '<div class="stack reader"><div class="row"><button class="btn ghost" data-go="reading">← Leituras</button></div>' +
-      '<div><span class="tag">' + esc(r.level) + '</span><span class="tag">' + esc(r.topic) + '</span>' + (st ? '<span class="tag">já lido</span>' : '') + '</div>' +
+    if (current.player) current.player.stop(true);
+    var r = current.r, p = ui.profile(), st = status(p, r), hasPt = translation(r).length > 0;
+    ui.view.innerHTML = '<div class="stack reader"><div class="row"><button class="btn ghost" data-go="reading">' + I("arrow-left") + ' Leituras</button></div>' +
+      '<div class="row"><span class="ico-chip" aria-hidden="true">' + I(topicIcon(r.topic)) + '</span><span class="tag">' + esc(r.level) + '</span><span class="tag">' + esc(cap(r.topic)) + '</span>' +
+      (st ? '<span class="tag">já lido</span>' : '') + '</div>' +
       '<h1 class="serif">' + esc(r.title) + '</h1>' +
-      '<div class="row"><button class="btn" id="listen">🔊 Ouvir o texto</button><select class="input" id="rate" style="width:auto"><option value="0.85">devagar</option><option value="1" selected>normal</option></select>' +
-      '<button class="btn ghost" id="saveSel" title="Selecione uma palavra ou expressão no texto">＋ Salvar seleção no Meu deck</button></div>' +
+      '<div id="player"></div>' +
+      '<div class="row"><button class="btn ghost sm" id="saveSel" title="Selecione uma palavra ou expressão no texto">' + I("star", "ic-sm") + ' Salvar seleção no Meu deck</button>' +
+      (hasPt ? '<button class="btn ghost sm" id="trAll" aria-pressed="false">' + I("languages", "ic-sm") + ' Mostrar toda a tradução</button>' : '') + '</div>' +
       '<article class="card text serif">' + markup(r) + '</article>' +
       '<div id="glossBox"></div>' +
       '<div class="card stack"><h2>Compreensão</h2>' + r.questions.map(function (q, qi) {
@@ -80,7 +119,7 @@
       }).join("") +
       (current.checked ? '<div id="result"></div>' : '<button class="btn primary big" id="check">Corrigir respostas</button>') + '</div>' +
       (current.checked && r.discussion ? '<div class="card"><h2>Agora escreva</h2><p class="serif">' + esc(r.discussion) + '</p>' +
-        '<button class="btn primary" data-go="writing" data-arg="reading:' + esc(r.id) + '">Escrever sobre isto</button></div>' : '') +
+        '<button class="btn primary" data-go="writing" data-arg="reading:' + esc(r.id) + '">' + I("pen-line") + ' Escrever sobre isto</button></div>' : '') +
       '<div class="card"><h2>Glossário</h2><ul class="list">' + (r.glossary || []).map(function (g) {
         return '<li><strong>' + esc(g.term) + '</strong> — ' + esc(g.pt) + '<br><span class="muted small">' + esc(g.meaning) + '</span></li>';
       }).join("") + '</ul></div></div>';
@@ -108,20 +147,14 @@
   function bind() {
     var r = current.r;
     ui.bindSpeakButtons();
-    var listening = false, queue = [];
-    var lb = document.getElementById("listen");
-    function stopAll() { listening = false; queue = []; ui.stopSpeaking(); lb.textContent = "🔊 Ouvir o texto"; }
-    function nextSentence() {
-      if (!listening || !document.body.contains(lb)) return;
-      var s = queue.shift();
-      if (!s) { stopAll(); return; }
-      ui.speak(s, { rate: +document.getElementById("rate").value, onend: nextSentence });
-    }
-    lb.onclick = function () {
-      if (listening) { stopAll(); return; }
-      listening = true; lb.textContent = "⏹ Parar";
-      queue = sentences(r.text).map(function (s) { return s.trim(); }).filter(Boolean);
-      nextSentence();
+    if (App.audio) current.player = App.audio.player(document.getElementById("player"), r.text);
+    var ta = document.getElementById("trAll");
+    if (ta) ta.onclick = function () {
+      var on = ta.getAttribute("aria-pressed") !== "true";
+      ta.setAttribute("aria-pressed", on);
+      ta.innerHTML = I("languages", "ic-sm") + (on ? " Esconder a tradução" : " Mostrar toda a tradução");
+      ui.view.querySelectorAll("article .tr").forEach(function (s) { s.hidden = !on; });
+      ui.view.querySelectorAll("article .trbtn").forEach(function (b) { b.setAttribute("aria-expanded", on); });
     };
     ui.view.querySelectorAll(".gloss").forEach(function (b) {
       b.onclick = function () {
@@ -129,7 +162,7 @@
         var box = document.getElementById("glossBox");
         box.innerHTML = '<div class="card glosscard"><div class="row" style="justify-content:space-between"><strong class="serif" style="font-size:1.2rem">' + esc(g.term) + '</strong>' +
           '<button class="btn ghost sm" id="glossClose">fechar</button></div><p>' + esc(g.pt) + '</p><p class="muted">' + esc(g.meaning) + '</p>' +
-          '<div class="row"><button class="speak" data-say="' + esc(g.term) + '" aria-label="Ouvir">🔊</button><button class="btn sm" id="glossSave">Salvar no Meu deck</button></div></div>';
+          '<div class="row">' + ui.speakBtn(g.term) + '<button class="btn sm" id="glossSave">Salvar no Meu deck</button></div></div>';
         ui.bindSpeakButtons(box);
         document.getElementById("glossClose").onclick = function () { box.innerHTML = ""; };
         document.getElementById("glossSave").onclick = function () {
@@ -162,10 +195,11 @@
       current.checked = true;
       current.gained = ui.award(xp);
       ui.markPlan("reading");
+      if (App.fx && n === r.questions.length) App.fx.confetti();
       render();
       var res = document.getElementById("result"); if (res) res.scrollIntoView({ block: "center" });
     };
   }
 
-  App.reading = { sentences: sentences, markup: markup };
+  App.reading = { sentences: sentences, markup: markup, topicIcon: topicIcon };
 })();

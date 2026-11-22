@@ -24,7 +24,7 @@ CONTENT.readings.push({
     { q: "In the text, 'buy the team some extra time' means:", options: ["pay workers overtime", "hire more people for the pour", "give the team more time before the concrete hardens", "delay the delivery of the trucks"], answer: 2, explain_pt: "'Buy time' é ganhar tempo; o retardador atrasa a pega e dá mais tempo à equipe." },
     { q: "What is the author's main purpose in the last paragraph?", options: ["To praise the hard work of site crews", "To stress that success depends on simple, careful planning", "To criticize concrete suppliers", "To explain a new technology"], answer: 1, explain_pt: "O último parágrafo resume a ideia: não é esforço heroico, é fazer bem as coisas 'chatas' (planejar, conferir, comunicar)." }
   ],
-  discussion: "Think about a hot-weather pour you have seen or managed. What went well, and what would you do differently? Write 80–120 words."
+  discussion: "Think about a hot-weather pour you have seen or managed. What went well, and what would you do differently?"
 });
 
 CONTENT.readings.push({
@@ -51,7 +51,7 @@ CONTENT.readings.push({
     { q: "In the fifth paragraph, 'they may have the edge' suggests that small offices:", options: ["are at greater risk", "might actually have an advantage", "are close to giving up", "cannot compete with big firms"], answer: 1, explain_pt: "'Have the edge' significa ter vantagem; o autor argumenta que escritórios pequenos mudam padrões mais rápido." },
     { q: "What can be inferred about the author's attitude towards automation?", options: ["It is risky and should be avoided", "It is only useful for big firms", "It frees skilled people for more valuable work", "It is a temporary trend"], answer: 2, explain_pt: "O autor diz que automatizar tarefas repetitivas permite que pessoas qualificadas foquem em decisões de projeto." }
   ],
-  discussion: "How do you use information in your own models or projects? What repetitive task would you automate first, and why? Write 100–150 words."
+  discussion: "How do you use information in your own models or projects? What repetitive task would you automate first, and why?"
 });
 
 CONTENT.readings.push({
@@ -78,7 +78,7 @@ CONTENT.readings.push({
     { q: "In the last paragraph, 'it's a free lesson' means that a near miss:", options: ["is a chance to learn without anyone getting hurt", "should be ignored because no one was injured", "costs the company nothing", "must be reported to the police"], answer: 0, explain_pt: "Um quase-acidente ensina algo sem o 'custo' de alguém se ferir — por isso é uma lição gratuita." },
     { q: "Why does the author mention the crane lift and the excavation?", options: ["To show that cranes are the main danger", "To criticize the site manager", "To explain a new law", "To give examples of specific, real tasks for short safety talks"], answer: 3, explain_pt: "São exemplos de tarefas concretas do dia, que tornam o DDS curto e específico mais útil." }
   ],
-  discussion: "What is one thing you could change on your sites tomorrow to improve safety culture? Explain how you would do it in 80–120 words."
+  discussion: "What is one thing you could change on your sites tomorrow to improve safety culture? Explain how you would do it."
 });
 
 CONTENT.readings.push({
@@ -105,7 +105,7 @@ CONTENT.readings.push({
     { q: "In the text, 'some clients will walk away' means they will:", options: ["visit your office", "pay more than expected", "recommend you to friends", "stop working with you"], answer: 3, explain_pt: "'Walk away' aqui é desistir da relação comercial, deixar de ser cliente." },
     { q: "What can we infer from the sentence about losing one client and gaining two?", options: ["Losing a low-paying client can be an opportunity", "Freelancers always find new clients quickly", "Clients who pay little are dishonest", "It is better to work with fewer clients in general"], answer: 0, explain_pt: "A ideia é que perder um cliente que paga pouco libera tempo para clientes melhores — uma oportunidade." }
   ],
-  discussion: "Have you ever had to raise your prices or ask for more money? How did you handle it, or how would you handle it now? Write 80–120 words."
+  discussion: "Have you ever had to raise your prices or ask for more money? How did you handle it, or how would you handle it now?"
 });
 
 CONTENT.readings.push({
@@ -132,7 +132,7 @@ CONTENT.readings.push({
     { q: "In the final paragraph, activities that 'no longer pull their weight' are ones that:", options: ["are physically demanding", "are too popular", "no longer contribute enough to justify the effort", "require heavy equipment"], answer: 2, explain_pt: "'Pull one's weight' é fazer sua parte; atividades que não compensam mais o esforço são abandonadas." },
     { q: "What is the author's overall attitude toward portfolio careers?", options: ["Completely enthusiastic", "Balanced: positive but aware of real drawbacks", "Strongly negative", "Indifferent"], answer: 1, explain_pt: "O autor mostra vantagens, mas diz que seria ingênuo pintar um quadro só positivo — postura equilibrada." }
   ],
-  discussion: "Do you see your own work as a portfolio career? What are the advantages and the biggest challenge for you? Write 100–150 words."
+  discussion: "Do you see your own work as a portfolio career? What are the advantages and the biggest challenge for you?"
 });
 
 CONTENT.readings.push({
@@ -158,7 +158,7 @@ CONTENT.readings.push({
     { q: "'A vacation from your vacation' suggests that fast trips can:", options: ["be very relaxing", "leave you exhausted", "be cheaper than expected", "last too long"], answer: 1, explain_pt: "A expressão brinca com a ideia de precisar descansar depois de uma viagem cansativa." },
     { q: "Why does the author include advice for people with only a few days off?", options: ["To say slow travel is impossible for them", "To sell a travel package", "To show that the idea can be adapted to short trips too", "To criticize people who travel quickly"], answer: 2, explain_pt: "Ele reconhece a limitação e sugere desacelerar um pouco mesmo em viagens curtas." }
   ],
-  discussion: "Do you prefer to see many places quickly or to stay longer in one place? Describe a trip that shows your preference in 80–120 words."
+  discussion: "Do you prefer to see many places quickly or to stay longer in one place? Describe a trip that shows your preference."
 });
 
 CONTENT.readings.push({
@@ -184,7 +184,7 @@ CONTENT.readings.push({
     { q: "In the text, 'paper trail' refers to:", options: ["documents and records that prove what happened", "a path inside the airport", "the airline's printed timetable", "a type of boarding pass"], answer: 0, explain_pt: "'Paper trail' são os comprovantes (cartões de embarque, recibos, prints) que documentam o ocorrido." },
     { q: "What is the purpose of the last paragraph?", options: ["To describe the author's worst trip", "To criticize big airports", "To recommend a specific airline", "To give tips for avoiding the problem in the future"], answer: 3, explain_pt: "O último parágrafo dá dicas preventivas: conexões mais longas, bagagem de mão, carregador etc." }
   ],
-  discussion: "Describe a problem you had while traveling (or one you fear). How did you, or how would you, deal with it? Write 80–120 words."
+  discussion: "Describe a problem you had while traveling (or one you fear). How did you, or how would you, deal with it?"
 });
 
 CONTENT.readings.push({
@@ -211,7 +211,7 @@ CONTENT.readings.push({
     { q: "What does the author suggest about colleagues who refuse to use AI?", options: ["They are protecting client data better", "They are more creative", "They will soon be promoted", "They are losing ground compared to others"], answer: 3, explain_pt: "'Falling behind' indica que estão ficando para trás em relação aos colegas." },
     { q: "Why does the author tell the story about the made-up number?", options: ["To warn readers to always check AI output", "To show that his boss is very strict", "To explain how reports are written", "To prove that AI is useless"], answer: 0, explain_pt: "A história serve de alerta: a ferramenta pode inventar dados, então é preciso conferir." }
   ],
-  discussion: "Which tasks in your work would you hand off to an AI assistant, and which would you never hand over? Explain in 80–120 words."
+  discussion: "Which tasks in your work would you hand off to an AI assistant, and which would you never hand over? Explain."
 });
 
 CONTENT.readings.push({
@@ -239,7 +239,7 @@ CONTENT.readings.push({
     { q: "What can be inferred from the example of the 'second channel'?", options: ["Organizations no longer fully trust a single voice or message", "Phone calls are easier to fake than emails", "Companies have stopped making payments", "Detection software is now mandatory"], answer: 0, explain_pt: "Exigir um segundo canal mostra que um único áudio ou mensagem já não basta como prova." },
     { q: "What is the author's main conclusion?", options: ["We should distrust everything we see", "Trust must now be earned and verified, not assumed", "Technology will soon solve the problem completely", "Old habits are useless against AI"], answer: 1, explain_pt: "A frase final diz que a confiança precisa ser conquistada, não dada como certa — sem cair no cinismo." }
   ],
-  discussion: "Have you ever received or shared something that turned out to be fake? What habits do you use to check information? Write 100–150 words."
+  discussion: "Have you ever received or shared something that turned out to be fake? What habits do you use to check information?"
 });
 
 CONTENT.readings.push({
@@ -267,7 +267,7 @@ CONTENT.readings.push({
     { q: "In the text, 'come under strain' most nearly means:", options: ["become more modern", "be sold to private companies", "be closed permanently", "be put under heavy pressure"], answer: 3, explain_pt: "'Come under strain' é ficar sobrecarregado, sob pressão, por causa do aumento da população." },
     { q: "What is the author's overall position on the small-town revival?", options: ["It is a temporary fashion with no benefits", "It will certainly continue for decades", "It is an opportunity, but only if managed carefully", "It should be stopped by local governments"], answer: 2, explain_pt: "O autor vê benefícios e problemas e conclui que pode ser uma chance rara, se a transição for bem conduzida." }
   ],
-  discussion: "Has your town changed because of people arriving from bigger cities, or the opposite? What are the effects? Write 100–150 words."
+  discussion: "Has your town changed because of people arriving from bigger cities, or the opposite? What are the effects?"
 });
 
 CONTENT.readings.push({
@@ -293,7 +293,7 @@ CONTENT.readings.push({
     { q: "What can we infer about alcohol from the text?", options: ["It is the best way to fall asleep", "It has no effect on sleep", "It may reduce the quality of sleep even if it helps you fall asleep", "It works better than caffeine"], answer: 2, explain_pt: "O texto diz que ajuda a pegar no sono, mas deixa o sono mais leve e interrompido." },
     { q: "What is the author's purpose in the final sentence?", options: ["To criticize grumpy people", "To recommend a medical treatment", "To describe his own personality", "To suggest that tiredness, not personality, may explain your bad mood"], answer: 3, explain_pt: "A frase final sugere que a pessoa cansada e irritada talvez só precisasse dormir mais." }
   ],
-  discussion: "How many hours do you usually sleep? What habit would you like to change to sleep better, and how will you do it? Write 80–120 words."
+  discussion: "How many hours do you usually sleep? What habit would you like to change to sleep better, and how will you do it?"
 });
 
 CONTENT.readings.push({
@@ -320,5 +320,5 @@ CONTENT.readings.push({
     { q: "In the text, 'throw a listener off' means to:", options: ["interrupt the listener", "confuse the listener", "ignore the listener", "impress the listener"], answer: 1, explain_pt: "'Throw someone off' é confundir, desorientar — o acento tônico errado atrapalha a compreensão." },
     { q: "What is the author's main purpose in the final paragraph?", options: ["To encourage learners to accept their accent and stop holding back", "To criticize native speakers", "To argue that pronunciation practice is useless", "To recommend acting classes"], answer: 0, explain_pt: "O autor propõe uma mudança psicológica: o sotaque não é defeito; aceitá-lo ajuda a fluência." }
   ],
-  discussion: "How do you feel about your accent in English? Which pronunciation point from the text would you like to work on first, and how? Write 100–150 words."
+  discussion: "How do you feel about your accent in English? Which pronunciation point from the text would you like to work on first, and how?"
 });

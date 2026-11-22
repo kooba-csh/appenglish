@@ -2,11 +2,14 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>AppEnglish</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..600&family=Plus+Jakarta+Sans:wght@400..800&display=swap">
   <link rel="stylesheet" href="css/style.css">
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#1f3a5f">
+  <meta name="theme-color" content="#4f46e5">
   <link rel="icon" type="image/png" href="icons/favicon.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,12 +19,12 @@
   <header class="topbar">
     <button class="brand" data-go="dashboard" aria-label="Painel">App<span>English</span></button>
     <span id="syncStatus" class="sync" aria-live="polite"></span>
-    <nav class="nav" id="nav">
-      <button data-go="dashboard">Painel</button>
-      <button data-go="study">Estudar</button>
-      <button data-go="notebook">Caderno</button>
-      <button data-go="progress">Progresso</button>
-      <button data-go="settings">Ajustes</button>
+    <nav class="nav" id="nav" aria-label="Principal">
+      <button data-go="dashboard" data-icon="house"><span>Painel</span></button>
+      <button data-go="study" data-icon="layers"><span>Estudar</span></button>
+      <button data-go="notebook" data-icon="notebook-pen"><span>Caderno</span></button>
+      <button data-go="progress" data-icon="chart-no-axes-column"><span>Progresso</span></button>
+      <button data-go="settings" data-icon="settings"><span>Ajustes</span></button>
     </nav>
   </header>
   <main id="view" class="view" tabindex="-1"></main>
@@ -32,21 +35,35 @@
   <script src="content/phrasal-verbs.js"></script>
   <script src="content/idioms.js"></script>
   <script src="content/collocations.js"></script>
+  <script src="content/iniciante-vocab.js"></script>
   <script src="content/readings.js"></script>
+  <script src="content/readings-temas-1.js"></script>
+  <script src="content/readings-temas-2.js"></script>
+  <script src="content/iniciante-leituras.js"></script>
+  <script src="content/readings-pt.js"></script>
   <script src="content/grammar.js"></script>
+  <script src="content/iniciante-gramatica.js"></script>
   <script src="content/writing.js"></script>
   <script src="content/speaking.js"></script>
+  <script src="content/iniciante-extra.js"></script>
+  <script src="content/nivelamento.js"></script>
+  <script src="content/translations.js"></script>
   <script src="js/srs.js"></script>
   <script src="js/game.js"></script>
   <script src="js/util.js"></script>
   <script src="js/storage.js"></script>
+  <script src="js/icons.js"></script>
   <script src="js/ai.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/audio.js"></script>
   <script src="js/reading.js"></script>
   <script src="js/grammar.js"></script>
   <script src="js/writing.js"></script>
   <script src="js/speaking.js"></script>
   <script src="js/progress.js"></script>
+  <script src="js/levels.js"></script>
+  <script src="js/games.js"></script>
+  <script src="js/fx.js"></script>
   <script src="js/cloud-config.js"></script>
   <script src="js/cloud.js"></script>
   <script>
