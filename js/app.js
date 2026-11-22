@@ -132,7 +132,7 @@
 
   // ---------- roteamento ----------
   var NAV_OF = { session: "study", reading: "study", grammar: "study", writing: "study", speaking: "study", conversation: "study",
-                 decks: "study", games: "study", placement: "study", leveltest: "progress", summary: "dashboard" };
+                 decks: "study", games: "study", verter: "study", placement: "study", leveltest: "progress", summary: "dashboard" };
   function go(name, arg) {
     if (!profile() && name !== "profiles") name = "profiles";
     if (route === "session" && name !== "session") session = null;
@@ -278,7 +278,8 @@
       tile("writing", "pen-line", "Escrita", p.writings.length + " de " + w.length + " propostas · correção por IA") +
       tile("speaking", "mic", "Fala (shadowing)", sh.length + " frases para repetir em voz alta") +
       tile("conversation", "messages-square", "Conversação", sc.length + " cenários com parceiro de IA") +
-      tile("games", "gamepad-2", "Jogos", "memória, relâmpago, monte a frase, ditado") +
+      tile("verter", "languages", "Verter frases (PT → EN)", "monte a frase em inglês, com dicas em 3 passos") +
+      tile("games", "gamepad-2", "Jogos", "figuras, memória, relâmpago, monte a frase, ditado") +
       '</div>' +
       '<div class="row"><button class="btn" data-go="decks">Gerenciar decks</button><button class="btn" data-go="leveltest">Prova de nível</button><button class="btn" data-go="placement">Teste de nivelamento</button></div></div>';
     var vt = document.getElementById("vocabTile");
@@ -337,7 +338,7 @@
 
   function details(it) {
     return '<div class="answer"><p class="meaning"><strong>' + esc(it.meaning) + '</strong></p>' +
-      '<p class="muted">PT: ' + esc(it.pt) + '</p><ul>' +
+      '<p class="muted">PT: ' + esc(it.pt) + '</p>' + (App.pics ? App.pics.block(it) : '') + '<ul>' +
       (it.examples || []).map(function (e) { return '<li>' + esc(e) + ' ' + speakBtn(e, true) + trToggle(trOf(e)) + '</li>'; }).join("") +
       '</ul>' + (it.pitfall && it._deck.type !== "custom" ? '<p class="pitfall">' + esc(it.pitfall) + '</p>' : '') + '</div>';
   }
@@ -355,6 +356,7 @@
     var s = session, it = s.item, html = header();
     if (s.phase === "flash") {
       html += '<div class="card flash"><div>' + tags(it) + '</div>' +
+        (App.pics ? App.pics.front(it) : '') +
         '<div class="term">' + esc(it.term) + '</div>' +
         '<div>' + speakBtn(it.term) + '</div>' +
         (s.flipped ? details(it) + gradeButtons()
@@ -364,7 +366,7 @@
       var parts = it.cloze.split("___");
       html += '<div class="card stack"><div>' + tags(it) + '<span class="tag">complete a frase</span></div>' +
         '<p class="cloze">' + esc(parts[0]) + '<strong style="color:var(--accent)">_____</strong>' + esc(parts[1] || "") + '</p>' +
-        '<p class="muted">Dica: ' + esc(it.pt) + '</p>';
+        (App.pics ? App.pics.front(it) : '') + '<p class="muted">Dica: ' + esc(it.pt) + '</p>';
       if (!s.checked) {
         html += '<form id="clozeForm" class="row"><input class="input" id="clozeInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a expressão" style="flex:1">' +
           '<button class="btn primary" type="submit">Verificar</button></form><button class="btn ghost" id="giveUp">Não sei</button>';

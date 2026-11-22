@@ -104,7 +104,7 @@
     ui.view.innerHTML = '<div class="stack reader"><div class="row"><button class="btn ghost" data-go="reading">' + I("arrow-left") + ' Leituras</button></div>' +
       '<div class="row"><span class="ico-chip" aria-hidden="true">' + I(topicIcon(r.topic)) + '</span><span class="tag">' + esc(r.level) + '</span><span class="tag">' + esc(cap(r.topic)) + '</span>' +
       (st ? '<span class="tag">já lido</span>' : '') + '</div>' +
-      '<h1 class="serif">' + esc(r.title) + '</h1>' +
+      '<div class="readhead">' + (App.pics && CONTENT.topicPic && CONTENT.topicPic[cap(r.topic)] ? App.pics.imgs([CONTENT.topicPic[cap(r.topic)]], "lg") : '') + '<h1 class="serif">' + esc(r.title) + '</h1></div>' +
       '<div id="player"></div>' +
       '<div class="row"><button class="btn ghost sm" id="saveSel" title="Selecione uma palavra ou expressão no texto">' + I("star", "ic-sm") + ' Salvar seleção no Meu deck</button>' +
       (hasPt ? '<button class="btn ghost sm" id="trAll" aria-pressed="false">' + I("languages", "ic-sm") + ' Mostrar toda a tradução</button>' : '') + '</div>' +

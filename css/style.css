@@ -331,3 +331,24 @@ textarea.writing { min-height: 260px; font-family: var(--serif); font-size: 1.08
 @keyframes fade { from { opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ---------- figuras (OpenMoji) e Verter — v3 ---------- */
+.pic { display: inline-flex; gap: 4px; align-items: center; flex: none; }
+.pic img { display: block; width: var(--pic, 56px); height: var(--pic, 56px); }
+.pic img:not([src]) { visibility: hidden; }
+.pic-sm { --pic: 36px; } .pic-md { --pic: 56px; } .pic-lg { --pic: 88px; } .pic-xl { --pic: 128px; }
+.picfront { display: flex; justify-content: center; }
+.picrow { display: flex; gap: 14px; align-items: center; padding: 10px 12px; margin: 10px 0; border-radius: 16px; background: var(--accent-soft); }
+.mnemo { margin: 0; font-style: italic; line-height: 1.45; }
+.picrow .mnemo .muted { font-style: normal; font-weight: 700; letter-spacing: .03em; }
+.card > .mnemo { padding: 10px 12px; border-radius: 14px; background: var(--accent-soft); }
+.readhead { display: flex; align-items: center; gap: 14px; }
+.readhead h1 { margin: 0; }
+.verter-q { display: flex; gap: 14px; align-items: center; }
+.verter-q .cloze { margin: 0; }
+.hints { margin: 0; padding: 10px 12px 10px 32px; border-radius: 14px; background: var(--primary-soft); }
+.hints li + li { margin-top: 6px; }
+.skel { letter-spacing: .06em; }
+.steps3 { margin: 0; padding-left: 22px; }
+.steps3 li + li { margin-top: 4px; }
+@media (max-width: 480px) { .picrow { flex-direction: column; text-align: center; } .verter-q { flex-direction: column; text-align: center; } .pic-xl { --pic: 104px; } }

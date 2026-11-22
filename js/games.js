@@ -3,6 +3,7 @@
   "use strict";
   var ui = App.ui, S = App.screens, U = App.util, esc = ui.esc, I = App.icon;
   var GAMES = [
+    { id: "pics", icon: "eye", name: "Figuras", desc: "Veja a figura e escolha a expressão em inglês. Depois, a imagem mental." },
     { id: "memory", icon: "grid-2x2", name: "Memória", desc: "Encontre os pares inglês ↔ português." },
     { id: "flash", icon: "zap", name: "Relâmpago", desc: "60 segundos: escolha o significado certo, o mais rápido que puder." },
     { id: "builder", icon: "shuffle", name: "Monte a frase", desc: "Coloque as palavras na ordem certa." },
@@ -39,6 +40,7 @@
 
   S.games = function (id) {
     clear();
+    if (id === "pics") return pics();
     if (id === "memory") return memory();
     if (id === "flash") return flash();
     if (id === "builder") return builder();
@@ -52,6 +54,38 @@
           '<small class="muted">' + x.desc + (x.id === "flash" && g.best.flash ? ' Recorde: ' + g.best.flash + '.' : '') + '</small></span></button>';
       }).join("") + '</div></div>';
   };
+
+  // ---------- Figuras: figura → expressão em inglês ----------
+  function pics() {
+    var all = pool().filter(function (it) { return App.pics && App.pics.has(it.id); });
+    if (all.length < 4) return few();
+    var list = U.shuffle(all).slice(0, 10), i = 0, right = 0;
+    function round() {
+      var it = list[i];
+      if (!it) return endScreen("Fim das figuras", [right + " de " + list.length + " acertos."], finish("pics", right * 2), pics);
+      var opts = U.shuffle([it].concat(U.shuffle(all.filter(function (x) { return x.term !== it.term; })).slice(0, 3)));
+      ui.view.innerHTML = '<div class="stack narrow">' + header("Figuras", '<span class="muted">' + (i + 1) + '/' + list.length + '</span>') +
+        '<div class="card stack" id="fcard"><div class="picfront">' + App.pics.imgs(it.id, "xl") + '</div>' +
+        '<p class="muted" style="text-align:center">Qual expressão a figura representa?</p>' +
+        '<div class="choices">' + opts.map(function (o, k) { return '<button class="btn choice" data-o="' + k + '">' + esc(o.term) + '</button>'; }).join("") + '</div></div></div>';
+      var done = false;
+      ui.view.querySelectorAll("[data-o]").forEach(function (b) {
+        b.onclick = function () {
+          if (done) return; done = true;
+          var pick = opts[+b.getAttribute("data-o")], ok = pick === it;
+          if (ok) right++;
+          ui.view.querySelectorAll("[data-o]").forEach(function (x) { if (opts[+x.getAttribute("data-o")] === it) x.classList.add("right"); });
+          if (!ok) b.classList.add("wrong");
+          var d = App.pics.data(it.id);
+          document.getElementById("fcard").insertAdjacentHTML("beforeend", '<p class="feedback ' + (ok ? "ok" : "no") + '">' + (ok ? "Isso!" : "Era: " + esc(it.term)) + ' — ' + esc(it.pt) + '</p>' +
+            (d && d.m ? '<p class="mnemo">' + esc(d.m) + '</p>' : '') + '<button class="btn primary big" id="pNext">Próxima</button>');
+          ui.speak(it.term);
+          document.getElementById("pNext").onclick = function () { i++; round(); };
+        };
+      });
+    }
+    round();
+  }
 
   // ---------- Memória ----------
   function memory() {

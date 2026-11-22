@@ -14,7 +14,7 @@
       xp: 0, streak: null, days: {}, cards: {}, sentences: [], disabledDecks: [],
       myCards: [], readings: {}, grammar: {}, writings: [], shadowing: {}, hardWords: {},
       conversations: [], levelTests: [], achievements: {}, drafts: {}, ai: { key: "", model: "claude-sonnet-5-5" },
-      knownDecks: [], audio: {}, games: { played: 0, best: {} }, placements: []
+      knownDecks: [], audio: {}, games: { played: 0, best: {} }, placements: [], picMode: "auto", verter: { done: 0, right: 0 }
     };
   }
 
@@ -34,6 +34,8 @@
       p.ai = p.ai || { key: "", model: "claude-sonnet-5-5" };
       // v2: níveis, voz, jogos e nivelamento (knownDecks fica vazio: levels.js decide os decks novos pelo nível)
       p.knownDecks = p.knownDecks || []; p.audio = p.audio || {}; p.games = p.games || { played: 0, best: {} }; p.placements = p.placements || [];
+      // v3: figuras e Verter
+      p.picMode = p.picMode || "auto"; p.verter = p.verter || { done: 0, right: 0 };
     });
     return s;
   }
